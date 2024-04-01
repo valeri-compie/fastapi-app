@@ -7,5 +7,4 @@ class Token(APIModel):
 
 
 class TokenData(APIModel):
-    username: str | None = None
-    scopes: list[str] = []
+    username: str

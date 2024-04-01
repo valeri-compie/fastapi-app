@@ -1,11 +1,9 @@
 from datetime import datetime, timedelta, timezone
 
-from passlib.context import CryptContext
 from jose import jwt
+from passlib.context import CryptContext
 
-from core.v1.auth.config import ALGORITHM
-from core.v1.auth.config import SECRET_KEY
-from core.v1.auth.model import TokenData
+from core.v1.config import config
 
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -26,12 +24,5 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
     else:
         expire = datetime.now(timezone.utc) + timedelta(minutes=15)
     to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+    encoded_jwt = jwt.encode(to_encode, config.JWT_KEY, algorithm=config.JWT_ALG)
     return encoded_jwt
-
-
-def get_token_data(token: str):
-    payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-    username: str = payload.get("sub")
-    token_scopes = payload.get("scopes", [])
-    return TokenData(scopes=token_scopes, username=username)

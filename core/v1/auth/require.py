@@ -1,44 +1,44 @@
-from fastapi import Depends, Security
-from fastapi.security import SecurityScopes
-from jose import JWTError
-from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
+from fastapi import Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer
+from jose import JWTError, jwt
 
-from core.v1.auth.exc import CredentialsException
-from core.v1.auth.exc import UnauthorizedException
-from core.v1.auth.exc import InactiveUserException
-from core.v1.auth.util import get_token_data
-from core.v1.user import service as user_service
-from core.v1.auth import oauth2_scheme
 from core.v1.user.model import UserDetail
+from core.v1.user import service as user_service
 from core.v1.database.require import db_session
+from core.v1.auth.model import TokenData
+from core.v1.config import config
 
 
-async def authorized_user(
-    scopes: SecurityScopes,
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
+
+
+async def get_current_user(
     db: AsyncSession = Depends(db_session),
     token: str = Depends(oauth2_scheme),
 ):
-    if scopes.scopes:
-        auth_value = f'Bearer scope="{scopes.scope_str}"'
-    else:
-        auth_value = "Bearer"
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="Could not validate credentials",
+        headers={"WWW-Authenticate": "Bearer"},
+    )
     try:
-        token_data = get_token_data(token=token)
-    except (JWTError, ValidationError):
-        raise CredentialsException(auth_value=auth_value)
+        payload = jwt.decode(token, config.JWT_KEY, algorithms=[config.JWT_ALG])
+        username: str = payload.get("sub")
+        if username is None:
+            raise credentials_exception
+        token_data = TokenData(username=username)
+    except JWTError:
+        raise credentials_exception
     user = await user_service.select_by_username(db=db, username=token_data.username)
     if user is None:
-        raise CredentialsException(auth_value=auth_value)
-    for scope in scopes.scopes:
-        if scope not in token_data.scopes:
-            raise UnauthorizedException(auth_value=auth_value)
+        raise credentials_exception
     return user
 
 
 async def get_current_active_user(
-    current_user: UserDetail = Security(authorized_user, scopes=["me-select"]),
+    current_user: UserDetail = Depends(get_current_user),
 ):
     if current_user.disabled:
-        raise InactiveUserException
+        raise HTTPException(status_code=400, detail="Inactive user")
     return current_user

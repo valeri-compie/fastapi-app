@@ -26,3 +26,4 @@ async def create_default_user():
     )
     async with AsyncSession(bind=engine) as session:
         await insert(db=session, payload=payload)
+    await engine.dispose()
