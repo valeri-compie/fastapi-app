@@ -31,7 +31,7 @@ async def authorized_user(
         token_data = get_token_data(token=token)
     except (JWTError, ValidationError):
         raise CredentialsException(auth_value=auth_value)
-    user = await user_service.select(db=db, username=token_data.username)
+    user = await user_service.select_by_username(db=db, username=token_data.username)
     if user is None:
         raise CredentialsException(auth_value=auth_value)
     for scope in scopes.scopes:
