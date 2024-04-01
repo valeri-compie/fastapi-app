@@ -4,6 +4,7 @@ from sqlalchemy import String
 
 from core.v1.model import ORMModel
 from core.v1.model import APIModel
+from core.v1.auth.util import get_password_hash
 
 
 class User(ORMModel):
@@ -18,7 +19,12 @@ class UserCreate(APIModel):
     password: str
 
     def orm_dump(self):
-        return self.model_dump()
+        dump = self.model_dump()
+        if "password" in dump.keys():
+            pwd = dump["password"]
+            hashed = get_password_hash(pwd)
+            dump["password"] = hashed
+        return dump
 
 
 class UserDetail(APIModel):
@@ -32,4 +38,9 @@ class UserUpdate(APIModel):
     password: str | None = None
 
     def orm_dump(self):
-        return self.model_dump(exclude_unset=True)
+        dump = self.model_dump(exclude_unset=True)
+        if "password" in dump.keys():
+            pwd = dump["password"]
+            hashed = get_password_hash(pwd)
+            dump["password"] = hashed
+        return dump

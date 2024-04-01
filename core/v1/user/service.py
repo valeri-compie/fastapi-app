@@ -19,6 +19,11 @@ async def select(db: AsyncSession, user_id: int) -> User | None:
     return await db.scalar(stmt)
 
 
+async def select_by_username(db: AsyncSession, username: str) -> User | None:
+    stmt = sql.select(User).where(User.username == username)
+    return await db.scalar(stmt)
+
+
 async def update(db: AsyncSession, user: User, payload: UserUpdate) -> User:
     for k, v in payload.orm_dump().items():
         user.__setattr__(k, v)

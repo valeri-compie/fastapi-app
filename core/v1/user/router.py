@@ -12,6 +12,7 @@ from core.v1.user.service import insert
 from core.v1.user.service import update
 from core.v1.user.service import delete
 from core.v1.user.require import user_in_path
+from core.v1.auth.require import get_current_active_user
 
 
 router = APIRouter()
@@ -55,3 +56,10 @@ async def delete_user(
 ):
     await delete(db=db, user=target_user)
     return Response(status_code=200)
+
+
+@router.get("/me/", response_model=UserDetail)
+async def read_users_me(
+    current_user: UserDetail = Depends(get_current_active_user),
+):
+    return current_user

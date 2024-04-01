@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 
-from core.v1.auth import router as auth_router
+from core.v1.auth.router import router as auth_router
 from core.v1.user.router import router as user_router
 
 
