@@ -4,6 +4,7 @@ from httpx import AsyncClient
 from asgi_lifespan import LifespanManager
 from fastapi import FastAPI
 
+from core.v1.auth.model import Token
 from core.v1.database.service import create_tables
 from core.v1.database.service import delete_tables
 from core.v1.config import config
@@ -26,8 +27,16 @@ async def transport(database):
         yield ASGITransport(manager.app)
 
 
-@pytest_asyncio.fixture
-async def client(transport: FastAPI):
+@pytest_asyncio.fixture(scope="session")
+async def client_guest(transport: FastAPI):
     client = AsyncClient(transport=transport, base_url="http://")
     async with client:
         yield client
+
+
+@pytest_asyncio.fixture(scope="session")
+async def client(client_guest: AsyncClient):
+    resp = await client_guest.post("/token/", data={"username": config.DEFAULT_USERNAME, "password": config.DEFAULT_PASSWORD})
+    data = Token(**resp.json())
+    client_guest.headers["Authorization"] = f"Bearer {data.access_token}"
+    yield client_guest

@@ -21,6 +21,7 @@ router = APIRouter()
 @router.get("/status", response_class=Response)
 async def status(
     db: AsyncSession = Depends(db_session),
+    current_user: UserDetail = Depends(get_current_active_user),
 ):
     return Response(status_code=200)
 
@@ -36,6 +37,7 @@ async def read_users_me(
 async def create_user(
     payload: UserCreate,
     db: AsyncSession = Depends(db_session),
+    current_user: UserDetail = Depends(get_current_active_user),
 ):
     return await insert(db=db, payload=payload)
 
@@ -43,6 +45,7 @@ async def create_user(
 @router.get("/{user_id}", response_model=UserDetail)
 async def select_user(
     target_user: User = Depends(user_in_path),
+    current_user: UserDetail = Depends(get_current_active_user),
 ):
     return target_user
 
@@ -52,6 +55,7 @@ async def update_user(
     payload: UserUpdate,
     target_user: User = Depends(user_in_path),
     db: AsyncSession = Depends(db_session),
+    current_user: UserDetail = Depends(get_current_active_user),
 ):
     return await update(db=db, user=target_user, payload=payload)
 
@@ -60,6 +64,7 @@ async def update_user(
 async def delete_user(
     target_user: User = Depends(user_in_path),
     db: AsyncSession = Depends(db_session),
+    current_user: UserDetail = Depends(get_current_active_user),
 ):
     await delete(db=db, user=target_user)
     return Response(status_code=200)
