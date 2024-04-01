@@ -9,7 +9,12 @@ from fastapi.security import OAuth2PasswordBearer
 oauth2_scheme = OAuth2PasswordBearer(
     tokenUrl="token",
     scopes={
-        "me": "Read information about the current user.",
-        "items": "Read items.",
+        "user-select": "Select users",
+        "user-create": "Create users",
+        "user-update": "Update users",
+        "user-delete": "Delete users",
+        "me-select": "Select current user",
+        "me-update": "Update current user",
+        "me-delete": "Delete current user",
     },
 )

@@ -1,9 +1,5 @@
-from typing import Annotated
-
 from fastapi import Depends, Security
-from fastapi.security import (
-    SecurityScopes,
-)
+from fastapi.security import SecurityScopes
 from jose import JWTError
 from pydantic import ValidationError
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -41,7 +37,7 @@ async def authorized_user(
 
 
 async def get_current_active_user(
-    current_user: Annotated[UserDetail, Security(authorized_user, scopes=["me"])],
+    current_user: UserDetail = Security(authorized_user, scopes=["me-select"]),
 ):
     if current_user.disabled:
         raise InactiveUserException
