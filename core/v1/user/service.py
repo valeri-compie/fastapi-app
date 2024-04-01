@@ -6,7 +6,7 @@ from core.v1.user.model import UserCreate
 from core.v1.user.model import UserUpdate
 
 
-async def insert(db: AsyncSession, payload: UserCreate) -> User:
+async def create(db: AsyncSession, payload: UserCreate) -> User:
     user = User(**payload.orm_dump())
     db.add(user)
     await db.commit()

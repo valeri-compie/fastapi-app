@@ -8,11 +8,9 @@ from core.v1.user.model import User
 from core.v1.user.model import UserCreate
 from core.v1.user.model import UserDetail
 from core.v1.user.model import UserUpdate
-from core.v1.user.service import insert
-from core.v1.user.service import update
-from core.v1.user.service import delete
-from core.v1.user.require import user_in_path
-from core.v1.auth.require import get_current_active_user
+from core.v1.user.require import target_user
+from core.v1.auth.require import active_user
+from core.v1.user import service
 
 
 router = APIRouter()
@@ -20,32 +18,32 @@ router = APIRouter()
 
 @router.get("/status", response_class=Response)
 async def status(
+    active_user: UserDetail = Depends(active_user),
     db: AsyncSession = Depends(db_session),
-    current_user: UserDetail = Depends(get_current_active_user),
 ):
     return Response(status_code=200)
-
-
-@router.get("/me/", response_model=UserDetail)
-async def read_users_me(
-    current_user: UserDetail = Depends(get_current_active_user),
-):
-    return current_user
 
 
 @router.post("/", response_model=UserDetail, status_code=201)
 async def create_user(
     payload: UserCreate,
+    active_user: UserDetail = Depends(active_user),
     db: AsyncSession = Depends(db_session),
-    current_user: UserDetail = Depends(get_current_active_user),
 ):
-    return await insert(db=db, payload=payload)
+    return await service.create(db=db, payload=payload)
+
+
+@router.get("/me", response_model=UserDetail)
+async def read_users_me(
+    active_user: UserDetail = Depends(active_user),
+):
+    return active_user
 
 
 @router.get("/{user_id}", response_model=UserDetail)
 async def select_user(
-    target_user: User = Depends(user_in_path),
-    current_user: UserDetail = Depends(get_current_active_user),
+    target_user: User = Depends(target_user),
+    active_user: UserDetail = Depends(active_user),
 ):
     return target_user
 
@@ -53,18 +51,18 @@ async def select_user(
 @router.patch("/{user_id}", response_model=UserDetail)
 async def update_user(
     payload: UserUpdate,
-    target_user: User = Depends(user_in_path),
+    target_user: User = Depends(target_user),
+    active_user: UserDetail = Depends(active_user),
     db: AsyncSession = Depends(db_session),
-    current_user: UserDetail = Depends(get_current_active_user),
 ):
-    return await update(db=db, user=target_user, payload=payload)
+    return await service.update(db=db, user=target_user, payload=payload)
 
 
 @router.delete("/{user_id}", response_class=Response)
 async def delete_user(
-    target_user: User = Depends(user_in_path),
+    target_user: User = Depends(target_user),
     db: AsyncSession = Depends(db_session),
-    current_user: UserDetail = Depends(get_current_active_user),
+    active_user: UserDetail = Depends(active_user),
 ):
-    await delete(db=db, user=target_user)
+    await service.delete(db=db, user=target_user)
     return Response(status_code=200)

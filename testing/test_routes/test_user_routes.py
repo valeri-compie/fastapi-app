@@ -3,7 +3,7 @@ from httpx import AsyncClient
 import shortuuid
 from core.v1.user.model import UserCreate
 from core.v1.user.model import UserDetail
-from core.v1.auth.util import verify_password
+from core.v1.auth.util import verify_hash
 
 
 async def test_create_user_a(client: AsyncClient):
@@ -17,7 +17,7 @@ async def test_create_user_a(client: AsyncClient):
     assert resp.status_code == 201
     user = UserDetail(**resp.json())
     assert user.username == username
-    assert verify_password(password, user.password)
+    assert verify_hash(password, user.password)
 
 
 async def test_create_user_b(client: AsyncClient):
@@ -31,7 +31,7 @@ async def test_create_user_b(client: AsyncClient):
     assert resp.status_code == 201
     user = UserDetail(**resp.json())
     assert user.username == username
-    assert verify_password(password, user.password)
+    assert verify_hash(password, user.password)
 
 
 async def test_select_user(client: AsyncClient, user_id: int = 2):
@@ -53,7 +53,7 @@ async def test_update_user(client: AsyncClient, user_id: int = 2):
     user = UserDetail(**resp.json())
     assert user.id == user_id
     assert user.username == username
-    assert verify_password(password, user.password)
+    assert verify_hash(password, user.password)
 
 
 async def test_delete_user(client: AsyncClient, user_id: int = 2):

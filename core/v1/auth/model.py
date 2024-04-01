@@ -7,4 +7,4 @@ class Token(APIModel):
 
 
 class TokenData(APIModel):
-    username: str
+    user_id: int

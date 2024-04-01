@@ -36,7 +36,7 @@ async def client_guest(transport: FastAPI):
 
 @pytest_asyncio.fixture(scope="session")
 async def client(client_guest: AsyncClient):
-    resp = await client_guest.post("/token/", data={"username": config.DEFAULT_USERNAME, "password": config.DEFAULT_PASSWORD})
+    resp = await client_guest.post("/auth/login", data={"username": config.DEFAULT_USERNAME, "password": config.DEFAULT_PASSWORD})
     data = Token(**resp.json())
     client_guest.headers["Authorization"] = f"Bearer {data.access_token}"
     yield client_guest

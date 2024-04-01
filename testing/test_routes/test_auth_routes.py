@@ -9,6 +9,6 @@ async def test_auth_headers(client: AsyncClient):
 
 
 async def test_auth_login(client: AsyncClient):
-    resp = await client.post("/token/", data={"username": config.DEFAULT_USERNAME, "password": config.DEFAULT_PASSWORD})
+    resp = await client.post("/auth/login", data={"username": config.DEFAULT_USERNAME, "password": config.DEFAULT_PASSWORD})
     assert resp.status_code == 201
     Token(**resp.json())
