@@ -1,7 +1,8 @@
-from fastapi import HTTPException, status
+from fastapi import status
+from core.v1.exc import APIException
 
 
-class CredentialsError(HTTPException):
+class CredentialsError(APIException):
     def __init__(self) -> None:
         super().__init__(
             status_code=status.HTTP_401_UNAUTHORIZED,
