@@ -13,6 +13,8 @@ pytest-asyncio = "*"
 shortuuid = "*"
 asgi-lifespan = "*"
 pytest-env = "*"
+python-jose = {extras = ["cryptography"], version = "*"}
+passlib = "*"
 
 [dev-packages]
 
