@@ -13,7 +13,7 @@ from core.v1.config import config
 from core.v1.auth.exc import CredentialsError
 
 
-auth_schema = OAuth2PasswordBearer(tokenUrl="token")
+auth_schema = OAuth2PasswordBearer(tokenUrl="/auth/login")
 
 
 async def jwt_subject(
