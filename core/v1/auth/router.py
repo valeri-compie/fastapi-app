@@ -13,12 +13,12 @@ from core.v1.auth.exc import CredentialsError
 router = APIRouter()
 
 
-@router.get("/status", response_class=Response)
+@router.get("/status", response_class=Response, tags=["Auth"])
 async def status(db: AsyncSession = Depends(db_session)) -> Token:
     return Response(status_code=200)
 
 
-@router.post("/login", status_code=201)
+@router.post("/login", status_code=201, tags=["Auth"])
 async def login(
     form: OAuth2PasswordRequestForm = Depends(OAuth2PasswordRequestForm),
     db: AsyncSession = Depends(db_session),
