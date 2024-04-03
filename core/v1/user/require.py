@@ -6,7 +6,7 @@ from core.v1.user import service
 from core.v1.database import require as db_require
 
 
-async def user_in_path(
+async def target_user(
     user_id: int,
     db: AsyncSession = Depends(db_require.db_session),
 ):

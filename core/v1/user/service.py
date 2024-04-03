@@ -6,7 +6,7 @@ from core.v1.user.model import UserCreate
 from core.v1.user.model import UserUpdate
 
 
-async def insert(db: AsyncSession, payload: UserCreate) -> User:
+async def create(db: AsyncSession, payload: UserCreate) -> User:
     user = User(**payload.orm_dump())
     db.add(user)
     await db.commit()
@@ -16,6 +16,11 @@ async def insert(db: AsyncSession, payload: UserCreate) -> User:
 
 async def select(db: AsyncSession, user_id: int) -> User | None:
     stmt = sql.select(User).where(User.id == user_id)
+    return await db.scalar(stmt)
+
+
+async def select_by_username(db: AsyncSession, username: str) -> User | None:
+    stmt = sql.select(User).where(User.username == username)
     return await db.scalar(stmt)
 
 
