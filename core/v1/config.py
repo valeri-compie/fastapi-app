@@ -7,7 +7,6 @@ from dotenv import load_dotenv
 class Config(BaseSettings):
     load_dotenv()
 
-    IS_TESTING: int = os.getenv("IS_TESTING")
     UVICORN_HOST: str = os.getenv("UVICORN_HOST")
     UVICORN_PORT: int = os.getenv("UVICORN_PORT")
     POSTGRES_DSN: str = os.getenv("POSTGRES_DSN")

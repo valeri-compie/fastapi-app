@@ -1,8 +1,9 @@
-from sqlalchemy.ext.asyncio import AsyncSession
-from fastapi import Depends, HTTPException
+from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
 from pydantic import ValidationError
+from jose import jwt
+from jose import JWTError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from core.v1.user.model import UserDetail
 from core.v1.user import service as user_service
@@ -12,12 +13,12 @@ from core.v1.config import config
 from core.v1.auth.exc import CredentialsError
 
 
-oauth2 = OAuth2PasswordBearer(tokenUrl="token")
+auth_schema = OAuth2PasswordBearer(tokenUrl="token")
 
 
-async def bearer(
+async def jwt_subject(
     db: AsyncSession = Depends(db_session),
-    token: str = Depends(oauth2),
+    token: str = Depends(auth_schema),
 ):
     try:
         decode = jwt.decode(token, config.JWT_KEY, algorithms=[config.JWT_ALG])
@@ -30,9 +31,9 @@ async def bearer(
     return holder
 
 
-async def active_user(
-    user: UserDetail = Depends(bearer),
+async def active_jwt_subject(
+    user: UserDetail = Depends(jwt_subject),
 ):
     if user.disabled:
-        raise HTTPException(status_code=400, detail="Inactive user")
+        raise CredentialsError
     return user

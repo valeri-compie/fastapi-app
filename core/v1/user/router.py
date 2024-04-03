@@ -9,7 +9,7 @@ from core.v1.user.model import UserCreate
 from core.v1.user.model import UserDetail
 from core.v1.user.model import UserUpdate
 from core.v1.user.require import target_user
-from core.v1.auth.require import active_user
+from core.v1.auth.require import active_jwt_subject
 from core.v1.user import service
 
 
@@ -18,7 +18,7 @@ router = APIRouter()
 
 @router.get("/status", response_class=Response)
 async def status(
-    active_user: UserDetail = Depends(active_user),
+    active_user: UserDetail = Depends(active_jwt_subject),
     db: AsyncSession = Depends(db_session),
 ):
     return Response(status_code=200)
@@ -27,7 +27,7 @@ async def status(
 @router.post("/", response_model=UserDetail, status_code=201)
 async def create_user(
     payload: UserCreate,
-    active_user: UserDetail = Depends(active_user),
+    active_user: UserDetail = Depends(active_jwt_subject),
     db: AsyncSession = Depends(db_session),
 ):
     return await service.create(db=db, payload=payload)
@@ -35,7 +35,7 @@ async def create_user(
 
 @router.get("/me", response_model=UserDetail)
 async def read_users_me(
-    active_user: UserDetail = Depends(active_user),
+    active_user: UserDetail = Depends(active_jwt_subject),
 ):
     return active_user
 
@@ -43,7 +43,7 @@ async def read_users_me(
 @router.get("/{user_id}", response_model=UserDetail)
 async def select_user(
     target_user: User = Depends(target_user),
-    active_user: UserDetail = Depends(active_user),
+    active_user: UserDetail = Depends(active_jwt_subject),
 ):
     return target_user
 
@@ -52,7 +52,7 @@ async def select_user(
 async def update_user(
     payload: UserUpdate,
     target_user: User = Depends(target_user),
-    active_user: UserDetail = Depends(active_user),
+    active_user: UserDetail = Depends(active_jwt_subject),
     db: AsyncSession = Depends(db_session),
 ):
     return await service.update(db=db, user=target_user, payload=payload)
@@ -62,7 +62,7 @@ async def update_user(
 async def delete_user(
     target_user: User = Depends(target_user),
     db: AsyncSession = Depends(db_session),
-    active_user: UserDetail = Depends(active_user),
+    active_user: UserDetail = Depends(active_jwt_subject),
 ):
     await service.delete(db=db, user=target_user)
     return Response(status_code=200)

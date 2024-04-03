@@ -11,7 +11,7 @@ from core.v1.config import config
 
 
 @pytest_asyncio.fixture(scope="session")
-async def database():
+async def setup_database():
     assert "testing" in config.POSTGRES_DSN
     await delete_tables()
     await create_tables()
@@ -20,7 +20,7 @@ async def database():
 
 
 @pytest_asyncio.fixture(scope="session")
-async def transport(database):
+async def transport(setup_database):
     from core.v1.app import app
 
     async with LifespanManager(app) as manager:
@@ -28,15 +28,15 @@ async def transport(database):
 
 
 @pytest_asyncio.fixture(scope="session")
-async def client_guest(transport: FastAPI):
+async def client(transport: FastAPI):
     client = AsyncClient(transport=transport, base_url="http://")
     async with client:
         yield client
 
 
 @pytest_asyncio.fixture(scope="session")
-async def client(client_guest: AsyncClient):
-    resp = await client_guest.post("/auth/login", data={"username": config.DEFAULT_USERNAME, "password": config.DEFAULT_PASSWORD})
+async def user_client(client: AsyncClient):
+    resp = await client.post("/auth/login", data={"username": config.DEFAULT_USERNAME, "password": config.DEFAULT_PASSWORD})
     data = Token(**resp.json())
-    client_guest.headers["Authorization"] = f"Bearer {data.access_token}"
-    yield client_guest
+    client.headers["Authorization"] = f"Bearer {data.access_token}"
+    yield client
